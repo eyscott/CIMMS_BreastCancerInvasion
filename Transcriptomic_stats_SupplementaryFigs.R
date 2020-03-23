@@ -137,7 +137,7 @@ Betty_data_wt_names_mat$Exp7<-(Betty_data_wt_names_mat$N7 + Betty_data_wt_names_
 #make a matrix with only sums and controls
 Betty_data_wt_mat_calc <- Betty_data_wt_names_mat[ ,c(15,16,18:24)]
 
-##make heatmap
+##make heatmap, S10C figure
 #cluster rows in matrix
 qlf_mat <- qlf_heatmap[ ,-1]
 row.names(qlf_mat)<-qlf_heatmap[ ,1] 
@@ -151,8 +151,7 @@ qlf_mat<- type.convert(qlf_mat,na.strings = "NA", as.is = FALSE, dec = ".")
 
 # creates a own color palette from red to green
 my_palette <- colorRampPalette(c("Blue", "white", "Red"))(n = 14)
-#n must always be 1 less than the length(col_breaks)
-#making the heatmap
+
 library(gplots)
 library(RColorBrewer)
 library(svDialogs)
@@ -167,8 +166,6 @@ lhei = c(1,0.5,4)
 
 pdf(file='Betty_ctrl_heatmap.pdf', width=5, height=8)
 par(mar=c(7,4,4,2)+0.1) 
-#you can play with col_breaks and colorRampPalette above to change colour saturation of the heatmap
-#col_breaks <- c(50,100,200,300,500,1000,2000,5000,7500,10000,15000,30000,50000,100000,10000000)
 col_breaks <- c(0,1,2,3,5,7,10,12,14,16,18,20,25,30)
 heatmap.2(qlf_mat_log,    # data matrix
           trace="none", 
@@ -176,7 +173,7 @@ heatmap.2(qlf_mat_log,    # data matrix
           margins =c(5,1),     # widens margins around plot
           col=viridis,       # use on color palette defined earlier
           breaks=col_breaks,    # enable color transition at specified limits
-          dendrogram="column",     # only draw a row dendrogram
+          dendrogram="column",    
           Colv=as.dendrogram(hc_control),
           Rowv=as.dendrogram(hr_control),
           hclustfun = hclust,
@@ -188,8 +185,8 @@ heatmap.2(qlf_mat_log,    # data matrix
           density.info="density", 
           lmat = lmat,
           lwid = lwid,
-          lhei = lhei)                # turn off column clustering
-dev.off()  # close the PNG device
+          lhei = lhei)            
+dev.off()  
 
 hmap_order <- data.frame(qlf_mat[rev(hr_control$labels[hr_control$order]), hc_control$labels[hc_control$order]])
 write.csv(hmap_order ,"Betty_ctrl_qlf_heatmap.csv")
