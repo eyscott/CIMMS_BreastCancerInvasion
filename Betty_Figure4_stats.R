@@ -1,22 +1,26 @@
-setwd('/Users/erica/Desktop/Betty_DGEs/Betty_stats/')
+##packages needed for this workflow
+library(reshape2)
+library(plyr)
+library(dplyr)
+
 #plot length of genes vs # of reads
 #Get gene matrix
 GeneMat <- read.table("BettyGeneMatrix.txt", header = F, stringsAsFactors = F)
+
 #subset wildtype and controls
 colnames(GeneMat) <- GeneMat[2,]
 rownames(GeneMat)<-GeneMat$Sample
 Betty_data_wt <-GeneMat[4:58281,c(1,16:29,32:33)]
 
 #get gene lengths
-gene_l <- read.table("Human_gene_length.txt", header = T, stringsAsFactors = F)
-#getting gene lengths from chr end-chr start
+gene_l <- read.table("Human_gene_length.txt", header = T, stringsAsFactors = F) #retrieved from Biomart
+#getting gene lengths from chr end -chr start
 gene_l$gene_L <- (gene_l$Gene_end-gene_l$Gene_start)
 #This file^ actually has gene start,emd, transcript length, GC content, gene type information
-#retrieved from Biomart
-#getting only what I need for right now, Gene lengths:
+#Retrieving gene lengths:
 gene_l_red <- gene_l[ ,c("Gene_name", "GeneStableIDversion","gene_L")]
 gene_l_red_u <- unique(gene_l_red)
-#Merge with gene lengths (Merging anf preserving order to look for duplicates and preserve order)
+#Merge with gene lengths (Merging and preserving order to look for duplicates)
 Betty_data_wt$id <- 1:nrow(Betty_data_wt) 
 Betty_data_wt_L <- merge(Betty_data_wt,gene_l_red_u, by.x="Sample", by.y="GeneStableIDversion", sort=F)
 ordered <- Betty_data_wt_L[order(Betty_data_wt_L$id), ]
