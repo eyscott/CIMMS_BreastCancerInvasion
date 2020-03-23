@@ -143,3 +143,60 @@ dev.off()
 hmap_order <- data.frame(qlf_heatmap_mat_ind[(hr_qlf$labels), ])
 write.csv(hmap_order ,"Betty_qlfheatmap.csv")
 
+## Make average columns for Invading (I) versus Non-Invading (NI)
+#extract just non-invading
+Betty_qlf_heatmap_mat_NI <- cbind(Gene_name=qlf_heatmap_mat_ind_names$Genename,qlf_heatmap_mat_ind_names[ ,grepl("N",colnames(qlf_heatmap_mat_ind_names))])
+#extract just invading
+Betty_qlf_heatmap_mat_I <- cbind(Gene_name=qlf_heatmap_mat_ind_names$Genename,qlf_heatmap_mat_ind_names[ ,grepl("I",colnames(qlf_heatmap_mat_ind_names))]) 
+
+# "gather" to average
+Betty_qlf_heatmap_I_melt <- gather(Betty_qlf_heatmap_mat_I,"variable", "value",2:5)
+Betty_qlf_heatmap_N_melt <- gather(Betty_qlf_heatmap_mat_NI,"variable", "value", 2:5)
+# then employ dpylr for averaging
+Betty_qlf_heatmap_I_melt_mean<- ddply(Betty_qlf_heatmap_I_melt, c("Gene_name"), summarise,
+                                      mean_I=mean(value))
+Betty_qlf_heatmap_N_melt_mean<- ddply(Betty_qlf_heatmap_N_melt, c("Gene_name"), summarise,
+                                      mean_N=mean(value))
+##attach these
+Betty_mean_N_and_I <- cbind(Betty_qlf_heatmap_I_melt_mean,Betty_qlf_heatmap_N_melt_mean)
+#now make the logFC column
+Betty_mean_FC_I <- (Betty_mean_N_and_I$mean_I-Betty_mean_N_and_I$mean_N)
+Betty_mean_N_and_I_FC<- cbind(Betty_mean_N_and_I[ ,c(1,2,4)],Betty_mean_FC_I )
+#prep for heatmap, make into matrix
+rownames(Betty_mean_N_and_I_FC) <- Betty_mean_N_and_I_FC$Gene_name
+Betty_mean_N_and_I_FC_mat <- as.matrix(type.convert(Betty_mean_N_and_I_FC[ ,c(2,3,4)],na.strings = "NA", as.is = FALSE, dec = "."))
+#cluster the rows
+hr <- hclust(as.dist(1-cor(t(Betty_mean_N_and_I_FC_mat[ ,c(1,2)]), method="pearson")),
+             method="average")
+Betty_mean_N_and_mat <- Betty_mean_N_and_I_FC_mat[ ,1:2]
+setwd('/Users/erica/Desktop/Betty_DGE/Figs')
+pdf(file='Betty_F5A.pdf', width=5, height=8,bg="white")
+par(mar=c(9,6,6,3)+0.2, pin=c(0,0)) 
+col_breaks <-c(seq(0,2.4,0.2),seq(3,5,0.5),6,7.5,10,12.5,15)
+heatmap.2(Betty_mean_N_and_mat,    # data matrix
+          trace="none", 
+          margins =c(8,8),     # widens margins around plot
+          col=viridis,       # use on color palette defined earlier
+          breaks=col_breaks,    # enable color transition at specified limits
+          labCol = c("Average I","Average N"),
+          cexCol = 1.5,
+          dendrogram="none",     # only draw a row dendrogram
+          Colv=F,
+          Rowv=as.dendrogram(hr),
+          hclustfun = hclust,
+          keysize = 1,
+          labRow = FALSE,
+          key.xlab = "CPM",
+          key.title = NA,
+          densadj = 0.5,
+          density.info="density",
+          denscol = "white",
+          lmat = lmat,
+          lwid = lwid,
+          lhei = lhei)                # turn off column clustering
+dev.off()  # close the PNG device
+
+hc <- hclust(as.dist(1-cor(Betty_mean_N_and_I_FC_mat, method="spearman")), method="average")
+hmap_order <- data.frame(Betty_mean_N_and_I_FC_mat[rev(hr$labels[hr$order]), hc$labels[hc$order]])
+write.csv(hmap_order ,"Betty_F5A_heatmap.csv")
+
