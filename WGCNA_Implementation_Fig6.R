@@ -1,10 +1,10 @@
-#preprocess BettyGeneMatrix with just wt cell line and conventional gene names
+#preprocess BettyGeneMatrix with conventional gene names
 WGCNA_in1 <- read.table("Betty_stats/BettyGeneMatrix.txt", header = F, stringsAsFactors = F)
 colnames(WGCNA_in1)<-WGCNA_in1[2,]
 #make a metadata sheet for later
 WGCNA_meta <- WGCNA_in1[1:3,c(16:29,32:33)]
 WGCNA_in1 <-WGCNA_in1[4:58281,c(16:29,34)]
-##keep only 3,5,6,7 (like DE analysis)
+##keep only 3,5,6,7 (mimic DE analysis)
 WGCNA_in1.5<- WGCNA_in1[ ,c(5,6,9:15)]
 
 #remove love expressed genes
@@ -82,7 +82,7 @@ WGCNA_meta_t$wgcna[grepl( "N" , WGCNA_meta_t$exp)]<-2
 WGCNA_meta_t$wgcna[grepl( "g" , WGCNA_meta_t$exp)]<-3
 WGCNA_meta_t$wgcna[grepl( "wp" , WGCNA_meta_t$exp)]<-4
 #manually remove samples removed bc of outliers I3,N2,N6
-#manually remove controls
+#manually remove control gel samples
 WGCNA_meta_2 <- WGCNA_meta_t[-c(15,16),]
 # Re-cluster samples
 sampleTree2 = hclust(dist(WGCNA_in3), method = "average")
@@ -98,7 +98,7 @@ allowWGCNAThreads()
 lnames = load(file = "Betty_wgcna_dataInput.RData")
 lnames
 
-# Choose a set of soft-thresholding powers
+# Choose a set of soft-thresholding powers (based upon above plot)
 powers = c(c(1:10), seq(from = 12, to=20, by=2))
 # Call the network topology analysis function
 sft = pickSoftThreshold(WGCNA_in3, powerVector = powers, verbose = 10)
