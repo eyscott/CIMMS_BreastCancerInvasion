@@ -8,5 +8,7 @@ The following pipelines can be summarized as:
 2. Implementing WGCNA: variance stabilizing gene matrix, developing thresholds for WGCNA, plotting with ggplot2.
 3. Generating statistics (in Supplementary Figures): Gathering and plotting genes versus reads data for each sample, utilizing UMAP package, and summarizing controls versus CIMMS derived RNA-seq data and plotting with heatmap.2 package.
 
-
+### Publication
+Submitted:  
+Li, B.B., Scott, E.Y., Chamberlain, M.D., Duong, B.T.V., Zhang, S., Done, S.J. & A.R. Wheeler.  "Cell Invasion in Digital Microfluidic Microgel Systems". 2020
 
